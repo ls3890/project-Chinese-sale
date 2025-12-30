@@ -1,15 +1,17 @@
 ﻿using projact.models;
+using projact.models.DTO;
 
 namespace projact.BLL
 {
     public interface IGiftService
     {
-        void Add(Gift gift);
-        void Remove(Gift gift);
-        void updete(Gift gift);
+        Task Add(GiftDto gift);
+        Task Remove(Gift gift);
+        Task updete(Gift gift);
         //void Get(Gift gift);
-        Gift? GetByName(string name);
-        List<Gift> GetByDonator(string donatorName);
+        Task<List<Gift>> GetByName(string name);
+        Task<List<Gift>> GetByDonator(string donatorName);
         Gift? GetNumOfCostemes(int NumOfCostemes);
+        Task<object?> GetAllGifts();
     }
 }

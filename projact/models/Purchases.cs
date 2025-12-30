@@ -1,15 +1,24 @@
-﻿namespace projact.models
+﻿using projact.models;
+
+public class Purchases
 {
-    public class Purchases
-    {
-        public int Id { get; set; }// מזהה רכישה
-        public string CustomerId { get; set; }// מזהה לקוח
-        public int GiftId { get; set; }// מזהה המתנה
-        public int Quantity { get; set; } // מספר כרטיסים
-        public decimal UnitPrice { get; set; }// מחיר ליחידה
-        public decimal TotalPrice { get; set; }// מחיר כולל
-        //public Boolean PaymentStatus { get; set; }// סטטוס תשלום
+    public int Id { get; set; }
 
+    // קשר ללקוח
+    //מפתח זר למשתמש
+    public int CustomerId { get; set; }
+    //ניווט למשתמש
+    public User Customer { get; set; }
 
-    }
+    // קשר למתנה
+    public int GiftId { get; set; }
+    // ניווט למתנה
+    public Gift Gift { get; set; }
+
+    // נתוני רכישה
+    public int Quantity { get; set; }
+    // מחיר ליחידה וסך הכל
+    public decimal UnitPrice { get; set; }
+    // מחיר כולל
+    public decimal TotalPrice { get; set; }
 }

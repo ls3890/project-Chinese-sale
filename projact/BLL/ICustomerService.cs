@@ -4,6 +4,6 @@ using projact.models;
 public interface ICustomerService
 {
     Task AddAsync(CustomerDto dto);
-    Task<List<Customer>> GetAllAsync();
-    Task<Customer?> GetByEmailAsync(string email);
+    Task<List<User>> GetAllAsync();
+    Task<User?> GetByEmailAsync(string email);
 }

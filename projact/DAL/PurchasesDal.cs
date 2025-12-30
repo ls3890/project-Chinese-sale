@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using projact.DAL;
 using projact.models;
+using projact.models;
 
 public class PurchasesDal : IPurchasesDal
 {

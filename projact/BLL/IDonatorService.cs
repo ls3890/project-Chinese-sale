@@ -5,9 +5,9 @@ namespace projact.BLL
 {
     public interface IDonatorService
     {
-        Task AddAsync(DonatorDto dto);
-        Task<List<Donator>> GetAllAsync();
-        Task<Donator?> GetByEmailAsync(string email);
-        Task RemoveAsync(string email);
+        Task AddDonatorAsync(DonatorDto dto);
+        Task<List<Donator>> GetAllDonatorAsync();
+        Task<Donator?> GetByEmailDonatorAsync(string email);
+        Task RemoveDonatorAsync(string email);
     }
 }

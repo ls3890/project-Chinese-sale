@@ -22,7 +22,7 @@ public class CustomerService : ICustomerService
         if (exists != null)
             throw new Exception("לקוח כבר קיים");
 
-        var customer = new Customer
+        var customer = new User
         {
             Name = dto.Name,
             Email = dto.Email,
@@ -33,12 +33,12 @@ public class CustomerService : ICustomerService
         await _customerDal.AddAsync(customer);
     }
 
-    public async Task<List<Customer>> GetAllAsync()
+    public async Task<List<User>> GetAllAsync()
     {
         return await _customerDal.GetAllAsync();
     }
 
-    public async Task<Customer?> GetByEmailAsync(string email)
+    public async Task<User?> GetByEmailAsync(string email)
     {
         if (string.IsNullOrWhiteSpace(email))
             throw new Exception("אימייל לא תקין");

@@ -2,7 +2,7 @@
 
 public interface ICustomerDal
 {
-    Task AddAsync(Customer customer);
-    Task<List<Customer>> GetAllAsync();
-    Task<Customer?> GetByEmailAsync(string email);
+    Task AddAsync(User customer);
+    Task<List<User>> GetAllAsync();
+    Task<User?> GetByEmailAsync(string email);
 }

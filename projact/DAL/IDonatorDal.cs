@@ -1,12 +1,17 @@
 ﻿using projact.models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace projact.DAL
 {
     public interface IDonatorDal
     {
-        Task AddAsync(Donator donator);
-        Task<Donator?> GetByEmailAsync(string email);
-        Task<List<Donator>> GetAllAsync();
-        Task RemoveAsync(Donator donator);
+        Task AddDonatorAsync(Donator donator);
+        Task<Donator?> GetByEmailDonatorAsync(string email);
+        Task<List<Donator>> GetAllDonatorAsync();
+        Task RemoveDonatorAsync(Donator donator);
+
+        // חדש: בדיקה/קבלת תורם לפי Id (סינכרוני/סימפלי)
+        Task <Donator?> GetById(int id);
     }
 }

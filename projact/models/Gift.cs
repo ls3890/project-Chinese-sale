@@ -4,9 +4,17 @@
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public string DonatorName { get; set; }
-        public int Price { get; set; }
-        public int NumOfCostermes { get; set; }
 
+        public int DonatorId { get; set; }
+        public Donator Donator { get; set; }
+
+        public decimal Price { get; set; } // מחירים כדאי שיהיו decimal ולא int
+
+        public int NumOfCustomers { get; set; } // שימי לב לשם המדויק
+
+        public string Category { get; set; }
+
+        public List<Purchases> Purchases { get; set; } = new List<Purchases>();
+        public int NumOfCostermes { get; internal set; }
     }
 }

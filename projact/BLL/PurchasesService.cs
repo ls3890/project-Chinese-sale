@@ -1,5 +1,8 @@
 using projact.models.DTO;
 using projact.models;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 public class PurchasesService : IPurchasesService
 {
@@ -15,6 +18,9 @@ public class PurchasesService : IPurchasesService
         if (string.IsNullOrWhiteSpace(dto.CustomerId))
             throw new Exception("CustomerId חובה");
 
+        if (!int.TryParse(dto.CustomerId, out int customerId))
+            throw new Exception("CustomerId לא תקין");
+
         if (dto.GiftId <= 0)
             throw new Exception("GiftId לא תקין");
 
@@ -26,7 +32,7 @@ public class PurchasesService : IPurchasesService
 
         var purchase = new Purchases
         {
-            CustomerId = dto.CustomerId,
+            CustomerId = customerId,
             GiftId = dto.GiftId,
             Quantity = dto.Quantity,
             UnitPrice = dto.UnitPrice,
