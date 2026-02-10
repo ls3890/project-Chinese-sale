@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using projact.DAL;
 using projact.models;
 using projact.models.DTO;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace projact.BLL
 {
@@ -14,133 +16,104 @@ namespace projact.BLL
         private readonly IDonatorDal _donatorDal;
         private readonly IMapper _mapper;
 
-
-        // קונסטרקטור מקבל גם את DonatorDal כדי לבדוק קיום תורם
-        public GiftService(IGiftDal giftDal, IDonatorDal donatorDal,IMapper mapper)
+        public GiftService(IGiftDal giftDal, IDonatorDal donatorDal, IMapper mapper)
         {
             _giftDal = giftDal;
             _donatorDal = donatorDal;
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper), "המיפוי לא מאותחל");
-
         }
 
-        // 1️ הוספת מתנה
-        public async Task Add(GiftDto gift)
+        // 1. הוספת מתנה
+        public async Task Add(GiftDto giftDto)
         {
-            // שלב 1: בדיקות וולידציה
-            if (string.IsNullOrWhiteSpace(gift.Name))
-                throw new Exception("שם המתנה הוא שדה חובה");
+            if (giftDto == null) throw new ArgumentNullException(nameof(giftDto));
 
-            if (gift.Price <= 0)
+            // 1. ולידציות בסיסיות
+            if (string.IsNullOrWhiteSpace(giftDto.Name))
+                throw new Exception("שם המתנה הוא שדה חובה");
+            if (giftDto.Price <= 0)
                 throw new Exception("מחיר חייב להיות גדול מ-0");
 
-            if (gift.NumOfCostermes < 0)
-                throw new Exception("מספר הלקוחות לא יכול להיות שלילי");
-
-            if (gift.DonatorId <= 0)
-                throw new Exception("Id של התורם חייב להיות מסופק");
-
-            // שלב 2: בדיקת קיום התורם
-            var donator = await _donatorDal.GetById(gift.DonatorId);
+            // 2. בדיקת קיום תורם - ודאי שה-ID הזה באמת קיים בטבלה
+            var donator = await _donatorDal.GetById(giftDto.DonatorId);
             if (donator == null)
-                throw new Exception("התורם עם המזהה שסופק לא נמצא");
+                throw new Exception($"התורם עם מזהה {giftDto.DonatorId} לא נמצא במערכת. לא ניתן להוסיף מתנה ללא תורם קיים.");
 
-            // שלב 3: בדיקת קיום מתנה עם אותו שם
-            var existingGift = await _giftDal.SearchGiftsAsync(gift.Name);
-            if (existingGift != null && existingGift.Count > 0)
+            // 3. בדיקה אם שם המתנה כבר תפוס
+            var existingGifts = await _giftDal.SearchGiftsAsync(name: giftDto.Name);
+            if (existingGifts != null && existingGifts.Any())
                 throw new Exception("כבר קיימת מתנה עם אותו שם");
 
-            if (gift == null)
-            {
-                throw new ArgumentNullException(nameof(gift), "המתנה לא יכולה להיות ריקה");
-            }
-            // שלב 4: מיפוי ה-DTO לאובייקט Gift
-            var g = _mapper.Map<Gift>(gift);  // מיפוי ה-DTO ל-Model (Gift)
+            // 4. מיפוי DTO ל-Entity
+            var giftEntity = _mapper.Map<Gift>(giftDto);
 
-            // שלב 5: הוספת המתנה למסד הנתונים
-            _giftDal.Add(g);
+            // --- התיקון הקריטי ---
+            // אנחנו מוודאים שה-Entity Framework לא ינסה ליצור תורם חדש.
+            // אנחנו אומרים לו: "התורם הוא null, תשתמש רק ב-DonatorId שכבר מופיע ב-Entity".
+            giftEntity.Donator = null;
+            giftEntity.DonatorId = giftDto.DonatorId;
+
+            _giftDal.Add(giftEntity);
         }
 
-        // 2️ הסרת מתנה
+        // 2. הסרת מתנה
         public async Task Remove(Gift gift)
         {
-            // ולידציה: המתנה חייבת להיות קיימת
-            var existingGift = _giftDal.SearchGiftsAsync(gift.Name);
-            if (existingGift == null)
-                throw new Exception("המתנה לא קיימת במערכת");
+            // בדיקה שהמתנה קיימת לפני מחיקה
+            if (gift == null) throw new ArgumentNullException(nameof(gift));
 
             _giftDal.Remove(gift);
+            await Task.CompletedTask; // DAL משתמש ב-SaveChanges סינכרוני
         }
 
-        // 3️ עדכון מתנה
+        // 3. עדכון מתנה
         public async Task updete(Gift gift)
         {
-            // ולידציה: חייב להיות ID חוקי
-            if (gift.Id <= 0)
-                throw new Exception("Id לא חוקי");
+            if (gift.Id <= 0) throw new Exception("Id לא חוקי לעדכון");
 
-            // ולידציה: שם חייב להיות מלא
-            if (string.IsNullOrWhiteSpace(gift.Name))
-                throw new Exception("שם המתנה הוא שדה חובה");
-
-            // ולידציה: מחיר חייב להיות חיובי
-            if (gift.Price <= 0)
-                throw new Exception("מחיר חייב להיות גדול מ-0");
-
-            // ולידציה: מספר לקוחות חייב להיות חיובי
-            if (gift.NumOfCostermes < 0)
-                throw new Exception("מספר הלקוחות לא יכול להיות שלילי");
-
-            // ולידציה: DonatorId חייב להיות תקין ולקיים
-            if (gift.DonatorId <= 0)
-                throw new Exception("Id של התורם חייב להיות תקין");
-
-            var donator = _donatorDal.GetById(gift.DonatorId);
+            // בדיקת קיום תורם לפני עדכון
+            var donator = await _donatorDal.GetById(gift.DonatorId);
             if (donator == null)
-                throw new Exception("התורם עם המזהה שסופק לא נמצא");
+                throw new Exception("התורם החדש שצוין לא נמצא");
 
             _giftDal.updete(gift);
         }
 
-        // 4️ קבלת מתנה לפי שם
-        public async Task<List<Gift>> GetByName(string name)
+        // 4. קבלת מתנות לפי שם - מחזיר DTO כולל שם תורם
+        public async Task<List<GiftDto>> GetByName(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new Exception("השם לא יכול להיות ריק");
+                throw new Exception("השם לחיפוש לא יכול להיות ריק");
 
-            return await _giftDal.SearchGiftsAsync(name);
+            var gifts = await _giftDal.SearchGiftsAsync(name: name);
+            return _mapper.Map<List<GiftDto>>(gifts);
         }
 
-        // 5️ קבלת כל המתנות של תורם מסוים
-        public async Task<List<Gift>> GetByDonator(string donatorName)
+        // 5. קבלת כל המתנות - כאן קורה המיפוי החשוב ל-Angular
+        public async Task<List<GiftDto>> GetAllGifts()
+        {
+            var gifts = await _giftDal.GetAllGifts();
+            if (gifts == null) return new List<GiftDto>();
+
+            // כאן AutoMapper לוקח את ה-Include(g => g.Donator) מה-DAL 
+            // ומכניס את Donator.Name לתוך השדה DonatorName ב-DTO
+            return _mapper.Map<List<GiftDto>>(gifts);
+        }
+
+        // 6. קבלת מתנות לפי תורם
+        public async Task<List<GiftDto>> GetByDonator(string donatorName)
         {
             if (string.IsNullOrWhiteSpace(donatorName))
                 throw new Exception("שם התורם לא יכול להיות ריק");
 
-            return await _giftDal.SearchGiftsAsync(donatorName);
+            var gifts = await _giftDal.SearchGiftsAsync(donatorName: donatorName);
+            return _mapper.Map<List<GiftDto>>(gifts);
         }
 
-        // 6️ קבלת מתנה לפי מספר לקוחות
-        /////////////////////////////////////////////////////
-        //public async Task<Gift?> GetNumOfCostemes(int numOfCostemes)
-        //{
-        //    if (numOfCostemes < 0)
-        //        throw new Exception("מספר הלקוחות לא יכול להיות שלילי");
-
-        //    //return _giftDal.SearchGiftsAsync(numOfCostemes);
-        //    return null;
-        //}
-
-        //קבלת כל המתנות הקיימת במכירה  הסינית
-        /////////////////////////////////////////////////////////////////////
-        public async Task<object?> GetAllGifts()
+        // מימוש פונקציית ממשק נוספת אם קיימת
+        public Gift? GetNumOfCostemes(int NumOfCostemes)
         {
-            var gifts = await _giftDal.GetAllGifts();
-            return gifts?.ToList();
-        }
-
-        Gift? IGiftService.GetNumOfCostemes(int NumOfCostemes)
-        {
+            // לוגיקה ספציפית אם נדרשת
             throw new NotImplementedException();
         }
     }

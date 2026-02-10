@@ -7,6 +7,8 @@ using Microsoft.OpenApi.Models; // הוספתי עבור הגדרות Swagger
 using System.Text;
 using projact.BLL;
 using projact.DAL;
+using projact.Services;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,10 +45,14 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+
 // --- הגדרות Controllers ---
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
+        // זו השורה שחסרה לך! היא תגרום לשרת לקבל "Name" בדיוק כמו שאנגולר שולח
+        options.JsonSerializerOptions.PropertyNamingPolicy = null;
+
         options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.Preserve;
         options.JsonSerializerOptions.MaxDepth = 64;
     });
@@ -90,12 +96,23 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             )
         };
     });
-
+// --- Raffle Service ---
+builder.Services.AddScoped<IRaffleService, RaffleService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 // --- Authorization ---
 builder.Services.AddAuthorization();
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()   // מאפשר לכל אתר (כולל האנגולר שלך) לגשת
+              .AllowAnyMethod()   // מאפשר GET, POST, PUT, DELETE
+              .AllowAnyHeader();  // מאפשר את כל כותרות ה-HTTP
+    });
+});
 var app = builder.Build();
 
+app.UseCors();
 // --- Middleware Pipeline ---
 if (app.Environment.IsDevelopment())
 {

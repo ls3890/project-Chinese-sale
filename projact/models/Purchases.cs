@@ -1,24 +1,25 @@
-﻿using projact.models;
-
-public class Purchases
+﻿namespace projact.models
 {
-    public int Id { get; set; }
+    public enum PurchaseStatus
+    {
+        Draft = 0,
+        Approved = 1
+    }
 
-    // קשר ללקוח
-    //מפתח זר למשתמש
-    public int CustomerId { get; set; }
-    //ניווט למשתמש
-    public User Customer { get; set; }
+    public class Purchases
+    {
+        public int Id { get; set; }
 
-    // קשר למתנה
-    public int GiftId { get; set; }
-    // ניווט למתנה
-    public Gift Gift { get; set; }
+        public int CustomerId { get; set; }
+        public User? Customer { get; set; }
 
-    // נתוני רכישה
-    public int Quantity { get; set; }
-    // מחיר ליחידה וסך הכל
-    public decimal UnitPrice { get; set; }
-    // מחיר כולל
-    public decimal TotalPrice { get; set; }
+        public int GiftId { get; set; }
+        public Gift? Gift { get; set; }
+
+        public int Quantity { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal TotalPrice { get; set; }
+
+        public PurchaseStatus Status { get; set; } = PurchaseStatus.Draft;
+    }
 }

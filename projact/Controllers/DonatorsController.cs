@@ -1,9 +1,8 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using projact.BLL;
 using projact.models.DTO;
-using Microsoft.AspNetCore.Authorization;
-
-
+using projact.models; // ודאי שזה קיים עבור מודל Donator
 
 [ApiController]
 [Route("api/[controller]")]
@@ -15,35 +14,58 @@ public class DonatorsController : ControllerBase
     {
         _service = service;
     }
-    [Authorize(Roles = "manager")]
-    [HttpPost]
-    public async Task<IActionResult> Add(DonatorDto dto)
-    {
-        await _service.AddDonatorAsync(dto);
-        return Ok();
-    }
 
-    [Authorize]
+    [AllowAnonymous]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
         return Ok(await _service.GetAllDonatorAsync());
     }
-    [Authorize]
-    [HttpGet("{email}")]
-    public async Task<IActionResult> GetByEmail(string email)
-    {
-        var donator = await _service.GetByEmailDonatorAsync(email);
-        if (donator == null)
-            return NotFound();
 
-        return Ok(donator);
-    }
-    [Authorize(Roles = "manager")]
-    [HttpDelete("{email}")]
-    public async Task<IActionResult> Delete(string email)
+    [AllowAnonymous]
+    [HttpPost]
+    public async Task<IActionResult> Add([FromBody] DonatorDto dto)
     {
-        await _service.RemoveDonatorAsync(email);
-        return NoContent();
+        try
+        {
+            await _service.AddDonatorAsync(dto);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    // שורה 47 המתוקנת נמצאת כאן - המחיקה מקבלת string email
+    [AllowAnonymous]
+    [HttpDelete("{email}")] // כאן אנחנו מגדירים שהפרמטר מה-URL הוא טקסט
+    public async Task<IActionResult> Delete(string email) // כאן הוא string
+    {
+        try
+        {
+            // כאן ה-email הוא string, ולכן ה-Service חייב לקבל string
+            await _service.RemoveDonatorAsync(email);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
+
+    [AllowAnonymous]
+    [HttpPut("{email}")]
+    public async Task<IActionResult> Update(string email, [FromBody] DonatorDto dto)
+    {
+        try
+        {
+            await _service.UpdateDonatorAsync(email, dto);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
     }
 }

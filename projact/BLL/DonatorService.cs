@@ -1,3 +1,4 @@
+using AutoMapper;
 using projact.DAL;
 using projact.models;
 using projact.models.DTO;
@@ -49,13 +50,38 @@ namespace projact.BLL
             return await _donatorDal.GetByEmailDonatorAsync(email);
         }
 
+        // מחיקת תורם לפי אימייל
         public async Task RemoveDonatorAsync(string email)
         {
             var donator = await _donatorDal.GetByEmailDonatorAsync(email);
             if (donator == null)
                 throw new Exception("תורם לא נמצא");
 
+            // ודאי שה-DAL מקבל אובייקט תורם למחיקה
             await _donatorDal.RemoveDonatorAsync(donator);
+        }
+
+        // עדכון תורם - הפונקציה החדשה שפתרה את שגיאה CS1061
+        public async Task UpdateDonatorAsync(string email, DonatorDto donatorDto)
+        {
+            var existingDonator = await _donatorDal.GetByEmailDonatorAsync(email);
+            if (existingDonator == null)
+                throw new Exception("תורם לעדכון לא נמצא");
+
+            // עדכון השדות
+            existingDonator.Name = donatorDto.Name;
+            existingDonator.Phone = donatorDto.Phone;
+
+            // שימי לב: בדרך כלל לא מעדכנים את המייל עצמו כי הוא ה"מפתח" שלנו
+            // אבל אם את רוצה לאפשר זאת, ודאי שהמייל החדש לא תפוס
+            if (existingDonator.Email != donatorDto.Email)
+            {
+                var emailTaken = await _donatorDal.GetByEmailDonatorAsync(donatorDto.Email);
+                if (emailTaken != null) throw new Exception("האימייל החדש כבר תפוס");
+                existingDonator.Email = donatorDto.Email;
+            }
+
+            await _donatorDal.UpdateDonatorAsync(existingDonator);
         }
     }
 }

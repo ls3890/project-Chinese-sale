@@ -11,9 +11,12 @@
         public decimal Price { get; set; } // מחירים כדאי שיהיו decimal ולא int
 
         public int NumOfCustomers { get; set; } // שימי לב לשם המדויק
-
+        
         public string Category { get; set; }
-
+        
+        public int? WinnerId { get; set; }
+        public User Winner { get; set; }
+        //רשימת רכישות של המתנה זו
         public List<Purchases> Purchases { get; set; } = new List<Purchases>();
         public int NumOfCostermes { get; internal set; }
     }

@@ -1,39 +1,45 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using projact.models.DTO;
-using Microsoft.AspNetCore.Authorization;
+using projact.Services;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-
-[ApiController]
-[Route("api/[controller]")]
-public class PurchasesController : ControllerBase
+namespace projact.Controllers
 {
-    private readonly IPurchasesService _service;
-
-    public PurchasesController(IPurchasesService service)
-    {
-        _service = service;
-    }
-    [Authorize(Roles = "manager")]
-    [HttpPost]
-    public async Task<IActionResult> Add(PurchasesDto dto)
-    {
-        await _service.AddAsync(dto);
-        return Ok();
-    }
+    [ApiController]
+    [Route("api/purchases")]
     [Authorize]
-    [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public class PurchasesController : ControllerBase
     {
-        return Ok(await _service.GetAllAsync());
-    }
-    [Authorize]
-    [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id)
-    {
-        var purchase = await _service.GetByIdAsync(id);
-        if (purchase == null)
-            return NotFound();
+        private readonly IPurchasesService _service;
 
-        return Ok(purchase);
+        public PurchasesController(IPurchasesService service)
+        {
+            _service = service;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Add(PurchasesDto dto)
+        {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await _service.AddToCartAsync(dto, userId);
+            return Ok();
+        }
+
+        [HttpGet("cart")]
+        public async Task<IActionResult> GetCart()
+        {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            return Ok(await _service.GetMyCartAsync(userId));
+        }
+
+        [HttpPost("confirm")]
+        public async Task<IActionResult> Confirm()
+        {
+            int userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
+            await _service.ConfirmOrderAsync(userId);
+            return Ok();
+        }
     }
 }

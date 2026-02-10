@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using projact.models;
-using System.Xml.Linq;
 
 namespace projact.DAL
 {
@@ -28,22 +27,26 @@ namespace projact.DAL
 
         public async Task<List<Donator>> GetAllDonatorAsync()
         {
-            return await _context.Donators.ToListAsync();
+            // מומלץ להוסיף Include אם את רוצה לראות את המתנות ברשימה הכללית
+            return await _context.Donators.Include(d => d.Gifts).ToListAsync();
         }
 
         public async Task RemoveDonatorAsync(Donator donator)
         {
-            Microsoft.EntityFrameworkCore.ChangeTracking.EntityEntry<Donator> entityEntry = _context.Donators.Remove(donator);
+            _context.Donators.Remove(donator);
             await _context.SaveChangesAsync();
         }
 
-        // מימוש חדש: קבלת תורם לפי Id
-      
-        public async Task<Donator> GetById(int id)
+        public async Task<Donator?> GetById(int id)
         {
             return await _context.Donators.FirstOrDefaultAsync(d => d.Id == id);
         }
 
-   
+        // מימוש פונקציית העדכון
+        public async Task UpdateDonatorAsync(Donator donator)
+        {
+            _context.Donators.Update(donator);
+            await _context.SaveChangesAsync();
+        }
     }
 }

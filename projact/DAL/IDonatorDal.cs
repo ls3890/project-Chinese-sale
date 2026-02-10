@@ -1,6 +1,4 @@
 ﻿using projact.models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace projact.DAL
 {
@@ -10,8 +8,9 @@ namespace projact.DAL
         Task<Donator?> GetByEmailDonatorAsync(string email);
         Task<List<Donator>> GetAllDonatorAsync();
         Task RemoveDonatorAsync(Donator donator);
+        Task<Donator?> GetById(int id);
 
-        // חדש: בדיקה/קבלת תורם לפי Id (סינכרוני/סימפלי)
-        Task <Donator?> GetById(int id);
+        // השורה שחסרה כדי לסגור את המעגל
+        Task UpdateDonatorAsync(Donator donator);
     }
 }

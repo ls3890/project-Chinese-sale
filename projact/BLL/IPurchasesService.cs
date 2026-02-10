@@ -1,9 +1,18 @@
 ﻿using projact.models.DTO;
-using projact.models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
-public interface IPurchasesService
+namespace projact.Services
 {
-    Task AddAsync(PurchasesDto dto);
-    Task<List<Purchases>> GetAllAsync();
-    Task<Purchases?> GetByIdAsync(int id);
+    public interface IPurchasesService
+    {
+        Task AddToCartAsync(PurchasesDto dto, int userId);
+        Task<List<PurchasesResponseDto>> GetMyCartAsync(int userId);
+        Task UpdateDraftAsync(int purchaseId, UpdateCartDto dto);
+        Task DeleteDraftAsync(int purchaseId);
+        Task ConfirmOrderAsync(int userId);
+        Task<List<PurchasesResponseDto>> GetMyApprovedOrdersAsync(int userId);
+        Task<List<PurchasesResponseDto>> GetAllApprovedAsync();
+        Task<List<PurchasesResponseDto>> GetByGiftAsync(int giftId);
+    }
 }

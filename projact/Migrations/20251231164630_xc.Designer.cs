@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using projact.DAL;
 
@@ -11,9 +12,11 @@ using projact.DAL;
 namespace projact.Migrations
 {
     [DbContext(typeof(ProjectDbContext))]
-    partial class ProjectDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251231164630_xc")]
+    partial class xc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,38 @@ namespace projact.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Purchases", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CustomerId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GiftId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("TotalPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CustomerId");
+
+                    b.HasIndex("GiftId");
+
+                    b.ToTable("Purchases");
+                });
 
             modelBuilder.Entity("User", b =>
                 {
@@ -123,39 +158,23 @@ namespace projact.Migrations
                     b.ToTable("Gifts");
                 });
 
-            modelBuilder.Entity("projact.models.Purchases", b =>
+            modelBuilder.Entity("Purchases", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                    b.HasOne("User", "Customer")
+                        .WithMany("Purchases")
+                        .HasForeignKey("CustomerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    b.HasOne("projact.models.Gift", "Gift")
+                        .WithMany("Purchases")
+                        .HasForeignKey("GiftId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.Property<int>("CustomerId")
-                        .HasColumnType("int");
+                    b.Navigation("Customer");
 
-                    b.Property<int>("GiftId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Quantity")
-                        .HasColumnType("int");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("TotalPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerId");
-
-                    b.HasIndex("GiftId");
-
-                    b.ToTable("Purchases");
+                    b.Navigation("Gift");
                 });
 
             modelBuilder.Entity("projact.models.Gift", b =>
@@ -173,25 +192,6 @@ namespace projact.Migrations
                     b.Navigation("Donator");
 
                     b.Navigation("Winner");
-                });
-
-            modelBuilder.Entity("projact.models.Purchases", b =>
-                {
-                    b.HasOne("User", "Customer")
-                        .WithMany("Purchases")
-                        .HasForeignKey("CustomerId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("projact.models.Gift", "Gift")
-                        .WithMany("Purchases")
-                        .HasForeignKey("GiftId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Customer");
-
-                    b.Navigation("Gift");
                 });
 
             modelBuilder.Entity("User", b =>

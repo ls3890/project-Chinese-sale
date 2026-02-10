@@ -1,6 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using projact.models;
-using System;
 
 namespace projact.DAL
 {
@@ -20,23 +19,22 @@ namespace projact.DAL
         {
             base.OnModelCreating(modelBuilder);
 
-            // קשר: תורם → מתנות
             modelBuilder.Entity<Gift>()
                 .HasOne(g => g.Donator)
                 .WithMany(d => d.Gifts)
                 .HasForeignKey(g => g.DonatorId);
 
-            // קשר: רכישה → לקוח
             modelBuilder.Entity<Purchases>()
                 .HasOne(p => p.Customer)
                 .WithMany(c => c.Purchases)
-                .HasForeignKey(p => p.CustomerId);
+                .HasForeignKey(p => p.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            // קשר: רכישה → מתנה
             modelBuilder.Entity<Purchases>()
                 .HasOne(p => p.Gift)
                 .WithMany(g => g.Purchases)
-                .HasForeignKey(p => p.GiftId);
+                .HasForeignKey(p => p.GiftId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
