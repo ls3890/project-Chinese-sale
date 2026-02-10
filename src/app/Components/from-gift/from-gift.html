@@ -1,0 +1,50 @@
+<p>from-gift works!</p>
+    <form [formGroup]="giftForm">
+
+    <!-- <div class="form-group">
+        <div class="from-label">id</div>
+        <div>
+            <input type="number" class="form-control" formControlName="id">
+            <input type="text" class="form-control"  formControlName="id" />
+
+        </div>
+         <div *ngIf="giftForm.controls['id'].touched && giftForm.controls['id'].errors && giftForm.controls['id'].errors['required']">
+            שדה חובה</div>
+    </div> -->
+ <!-- </div>  -->
+         
+<div class="form-group">
+    <div class="form-label">שם המתנה</div>
+    <div>
+        <input type="text" class="form-control" formControlName="giftName"
+            [class.border-danger]="giftForm.controls['giftName'].invalid && giftForm.controls['giftName'].touched" />
+        <div class="text-danger"
+            *ngIf="giftForm.controls['giftName'].touched && giftForm.controls['giftName'].errors && giftForm.controls['giftName'].errors['required']">
+            שדה חובה</div>
+        <div class="text-danger"
+            *ngIf="giftForm.controls['giftName'].errors && giftForm.controls['giftName'].errors['minlength']">
+            כותרת חיב להיות לפחות 10 תווים</div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="form-label">תורם</div>
+    <div>
+        <input type="text" class="form-control" formControlName="donatorName" />
+    </div>
+</div>
+    <div class="form-group">
+        <div class="form-label"> מחיר</div>
+        <div>
+            <input type="number" class="form-control" formControlName="price" />
+        </div>
+        <div class="text-danger"
+            *ngIf="giftForm.controls['price'].errors && giftForm.controls['price'].errors['min']">
+           מחיר מינמלי הוא 5</div>
+    </div>
+
+<div>
+
+    <button (click)="saveNewGift()" [disabled]="giftForm.invalid"  >💾שמירה</button>
+</div>
+    </form>
+להוסיף שמירה וביטול

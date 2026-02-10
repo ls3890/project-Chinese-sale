@@ -1,0 +1,140 @@
+<div class="donators-container" dir="rtl">
+  <!-- Back to Home Button -->
+  <div style="margin-bottom: 20px;">
+    <button routerLink="/home" style="background: white; color: #667eea; padding: 10px 20px; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+      🏠 חזרה לדף הבית
+    </button>
+  </div>
+
+  <h2>ניהול תורמים ומתנות</h2>
+
+  <div class="card form-card">
+    <h3>{{ isEditMode ? 'עריכת פרטי תורם' : 'הוספת תורם חדש' }}</h3>
+    <form (ngSubmit)="saveDonator()" #donatorForm="ngForm">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="name">שם מלא:</label>
+          <input 
+            type="text" 
+            id="name"
+            name="Name" 
+            [(ngModel)]="currentDonator.Name" 
+            required 
+            class="form-control"
+            placeholder="הכנס שם תורם">
+        </div>
+
+        <div class="form-group">
+          <label for="email">אימייל:</label>
+          <input 
+            type="email" 
+            id="email"
+            name="Email" 
+            [(ngModel)]="currentDonator.Email" 
+            required 
+            email
+            class="form-control"
+            placeholder="example@mail.com">
+        </div>
+
+        <div class="form-group">
+          <label for="phone">טלפון:</label>
+          <input 
+            type="text" 
+            id="phone"
+            name="Phone" 
+            [(ngModel)]="currentDonator.Phone" 
+            class="form-control"
+            placeholder="05X-XXXXXXX">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" [disabled]="!donatorForm.valid" class="btn btn-save">
+          {{ isEditMode ? 'שמור שינויים' : 'הוסף תורם' }}
+        </button>
+        <button type="button" (click)="resetForm()" class="btn btn-cancel">ביטול</button>
+      </div>
+    </form>
+  </div>
+
+  <hr class="separator">
+
+  <div class="search-section">
+    <div class="search-wrapper">
+      <input 
+        type="text" 
+        [(ngModel)]="searchText" 
+        class="search-input"
+        placeholder="🔍 חיפוש לפי שם, אימייל או שם מתנה...">
+    </div>
+    <p class="search-hint" *ngIf="searchText">
+      מציג תוצאות עבור: <strong>{{ searchText }}</strong>
+    </p>
+  </div>
+
+  <div class="table-container">
+    <table class="styled-table">
+      <thead>
+        <tr>
+          <th>שם התורם</th>
+          <th>אימייל</th>
+          <th>טלפון</th>
+          <th>מתנות</th>
+          <th>פעולות</th>
+        </tr>
+      </thead>
+      <tbody>
+        <ng-container *ngFor="let donator of filteredDonators">
+          
+          <tr [class.active-row]="isExpanded(donator)">
+            <td>{{ donator.Name }}</td>
+            <td>{{ donator.Email }}</td>
+            <td>{{ donator.Phone || '---' }}</td>
+            <td>
+              <button type="button" class="btn-link" (click)="toggleGifts(donator)">
+                <span [class.highlight-text]="searchText && getGiftCount(donator) > 0">
+                  {{ getGiftCount(donator) }} מתנות 
+                </span>
+                <span class="arrow-icon">{{ isExpanded(donator) ? '▲' : '▼' }}</span>
+              </button>
+            </td>
+            <td class="actions-cell">
+              <button type="button" class="btn-action edit" (click)="startEdit(donator)" title="ערוך">✏️</button>
+              <button type="button" class="btn-action delete" (click)="deleteDonator(donator)" title="מחק">🗑️</button>
+            </td>
+          </tr>
+
+          <tr *ngIf="isExpanded(donator)" class="details-row">
+            <td colspan="5">
+              <div class="gifts-panel">
+                <h4 *ngIf="getGifts(donator).length > 0">רשימת מתנות שנתרמו:</h4>
+                
+                <ul class="gifts-grid" *ngIf="getGifts(donator).length > 0">
+                  <li *ngFor="let gift of getGifts(donator)" class="gift-item">
+                    <span class="gift-name">{{ gift.Name || gift.name }}</span>
+                    <span class="gift-price">{{ gift.Price || gift.price }} ₪</span>
+                  </li>
+                </ul>
+
+                <div class="no-gifts" *ngIf="getGifts(donator).length === 0">
+                  <p>טרם נרשמו מתנות לתורם זה.</p>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+        </ng-container>
+
+        <tr *ngIf="filteredDonators.length === 0">
+          <td colspan="5" class="empty-state">
+            <div class="empty-content">
+              <span>📭</span>
+              <p>לא נמצאו תורמים או מתנות התואמים לחיפוש שלך.</p>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

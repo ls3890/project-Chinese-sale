@@ -1,0 +1,67 @@
+<div class="gifts-page" style="direction: rtl; padding: 20px;">
+    <!-- Back to Home Button -->
+  <div style="margin-bottom: 15px;">
+    <button routerLink="/home" style="background: white; color: #667eea; padding: 10px 20px; border: 2px solid #667eea; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+      🏠 חזרה לדף הבית
+    </button>
+  </div>
+  <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>ניהול מתנות 🎁</h2>
+    <button (click)="onLogout()" class="logout-btn">התנתק 🚪</button>
+  </header>
+
+  <form *ngIf="authService.isAdmin()" (ngSubmit)="saveGift()" #giftForm="ngForm" class="gift-form" 
+        style="background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 20px;">
+    <h3>{{ isEditMode ? '📝 ערוך מתנה' : '➕ הוסף מתנה חדשה' }}</h3>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <input name="name" [(ngModel)]="newGift.name" placeholder="שם המתנה" required style="padding: 8px;">
+      <input name="price" type="number" [(ngModel)]="newGift.price" placeholder="מחיר" required style="padding: 8px;">
+      <input name="donatorId" type="number" [(ngModel)]="newGift.donatorId" placeholder="ID תורם" required style="padding: 8px;">
+      <input name="category" [(ngModel)]="newGift.category" placeholder="קטגוריה" required style="padding: 8px;">
+      
+      <button type="submit" [disabled]="giftForm.invalid" 
+              [style.background]="isEditMode ? '#ffc107' : '#28a745'" 
+              style="color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+        {{ isEditMode ? 'עדכן שינויים' : 'שמור מתנה' }}
+      </button>
+      <button type="button" *ngIf="isEditMode" (click)="cancelEdit()" 
+              style="background: #6c757d; color: white; border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer;">
+        ביטול
+      </button>
+    </div>
+  </form>
+
+  <hr>
+
+  <div class="filters-bar" style="display: flex; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
+    <input [(ngModel)]="filterName" placeholder="🔍 סנן לפי שם מתנה" style="padding: 8px; flex: 1; min-width: 200px;">
+    <input [(ngModel)]="filterDonator" placeholder="👤 סנן לפי שם תורם" style="padding: 8px; flex: 1; min-width: 200px;">
+    <input type="number" [(ngModel)]="filterPurchasers" placeholder="🔢 מינימום רוכשים" style="padding: 8px; width: 150px;">
+    
+    <select (change)="sortGifts($any($event.target).value)" style="padding: 8px; border-radius: 5px; border: 1px solid #ddd; cursor: pointer; font-weight: 600;">
+      <option value="">מיין לפי...</option>
+      <option value="price-high">💰 מחיר (גבוה לנמוך)</option>
+      <option value="price-low">💰 מחיר (נמוך לגבוה)</option>
+      <option value="popular">⭐ הכי פופולרי</option>
+      <option value="name">📝 שם</option>
+    </select>
+  </div>
+
+  <div *ngIf="isLoading" style="text-align: center;">טוען מתנות...</div>
+
+  <div class="gifts-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px;">
+    <div *ngFor="let gift of filteredGifts" class="gift-card" 
+         style="border: 1px solid #eee; padding: 15px; border-radius: 12px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+      <h4 style="margin-top: 0; color: #333;">{{ $any(gift).name || $any(gift).Name }}</h4>
+      <p><b>תורם:</b> {{ $any(gift).donatorName || $any(gift).DonatorName || 'לא ידוע' }}</p>
+      <p><b>קטגוריה:</b> {{ $any(gift).category || $any(gift).Category }}</p>
+      <p style="font-size: 1.2em; color: #28a745; font-weight: bold;">{{ $any(gift).price || $any(gift).Price }} ₪</p>
+      <p><b>רוכשים:</b> {{ $any(gift).numOfCostermes || $any(gift).NumOfCostermes || 0 }}</p>
+
+      <div class="card-actions" *ngIf="authService.isAdmin()" style="display: flex; gap: 8px; margin-top: 15px;">
+        <button (click)="startEdit(gift)" style="flex: 1; background: #ffc107; border: none; padding: 6px; border-radius: 4px; cursor: pointer;">ערוך ✏️</button>
+        <button (click)="deleteGift(gift)" style="flex: 1; background: #dc3545; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer;">מחק 🗑️</button>
+      </div>
+    </div>
+  </div>
+</div>

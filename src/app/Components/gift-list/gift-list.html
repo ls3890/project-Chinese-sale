@@ -1,0 +1,24 @@
+<h1>Table-GiftList</h1>
+<h1>רשימת המתנות</h1>
+<table class="Table-GiftList">
+    <thead>
+        <tr>
+            <th>קוד המתנה </th>
+            <th>שם המתנה </th>
+            <th>תורם המתנה </th>
+            <th>מחיר המתנה</th>
+         </tr>
+    </thead>
+    <tbody>
+        @for(item of giftVac ;track item.id){
+            <tr>
+            <td>{{item.id}}</td>
+            <td>{{item.giftName}}</td>
+            <td>{{item.donatorName}}</td>       
+            <td>{{item.price}}</td>
+            <!-- <td><button (click)="openEdit(t.id)">✏️</button></td>
+            <td><button (click)="closeEdit(-1)">😊</button></td> -->
+       </tr>
+     }
+    </tbody>
+</table>

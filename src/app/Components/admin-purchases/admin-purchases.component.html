@@ -1,0 +1,290 @@
+<div class="admin-purchases-container" dir="rtl">
+  <!-- Back to Home Button -->
+  <div class="back-to-home-section">
+    <button routerLink="/home" class="btn-back-home">
+      🏠 חזרה לאתר הראשי
+    </button>
+  </div>
+
+  <!-- Header -->
+  <div class="page-header">
+    <div class="header-content">
+      <h1>📊 ניהול מכירות - פאנל מנהל</h1>
+      <button 
+        class="btn-refresh" 
+        (click)="refreshData()"
+        [disabled]="isLoading"
+        title="רענן נתונים"
+      >
+        🔄
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>טוען נתונים...</p>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content" *ngIf="!isLoading">
+    <!-- Statistics Dashboard -->
+    <div class="stats-dashboard">
+      <div class="stat-card revenue">
+        <div class="stat-icon">💰</div>
+        <div class="stat-content">
+          <div class="stat-label">סך הכנסות</div>
+          <div class="stat-value">₪{{ totalRevenue.toFixed(2) }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card quantity">
+        <div class="stat-icon">📦</div>
+        <div class="stat-content">
+          <div class="stat-label">יחידות שנמכרו</div>
+          <div class="stat-value">{{ totalQuantitySold }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card gifts">
+        <div class="stat-icon">🎁</div>
+        <div class="stat-content">
+          <div class="stat-label">מתנות ייחודיות</div>
+          <div class="stat-value">{{ totalGiftsSold }}</div>
+        </div>
+      </div>
+
+      <div class="stat-card purchases">
+        <div class="stat-icon">🛒</div>
+        <div class="stat-content">
+          <div class="stat-label">סה"כ רכישות</div>
+          <div class="stat-value">{{ totalPurchases }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Controls Section -->
+    <div class="controls-section">
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchText" 
+          placeholder="🔍 חפש לפי שם מתנה או מזהה..."
+          class="search-input"
+        />
+      </div>
+
+      <div class="sort-controls">
+        <label>מיין לפי:</label>
+        <button 
+          class="sort-btn"
+          [class.active]="currentSort === 'popularity'"
+          (click)="sortGifts('popularity')"
+        >
+          🔥 פופולריות {{ getSortIndicator('popularity') }}
+        </button>
+        <button 
+          class="sort-btn"
+          [class.active]="currentSort === 'price'"
+          (click)="sortGifts('price')"
+        >
+          💵 מחיר {{ getSortIndicator('price') }}
+        </button>
+        <button 
+          class="sort-btn"
+          [class.active]="currentSort === 'name'"
+          (click)="sortGifts('name')"
+        >
+          🔤 שם {{ getSortIndicator('name') }}
+        </button>
+      </div>
+
+      <button 
+        *ngIf="selectedGiftId !== null"
+        class="btn-clear-filter"
+        (click)="selectGift(null)"
+      >
+        ❌ נקה סינון
+      </button>
+    </div>
+
+    <!-- Gifts Sales Table -->
+    <div class="section">
+      <h2>📈 סיכום מכירות לפי מתנות</h2>
+      
+      <div class="table-container" *ngIf="filteredGifts.length > 0; else noGifts">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>מזהה</th>
+              <th>שם המתנה</th>
+              <th>מחיר יחידה</th>
+              <th>כמות נמכרה</th>
+              <th>מס' רכישות</th>
+              <th>סה"כ הכנסות</th>
+              <th>פעולות</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              *ngFor="let gift of filteredGifts; let i = index"
+              [class.selected]="isGiftSelected(gift.giftId)"
+              class="data-row"
+            >
+              <td class="row-number">{{ i + 1 }}</td>
+              <td class="gift-id">{{ gift.giftId }}</td>
+              <td class="gift-name">
+                <div class="name-cell">
+                  <span class="name-text">{{ gift.giftName }}</span>
+                  <span class="popularity-badge" *ngIf="i < 3">
+                    {{ i === 0 ? '🥇' : i === 1 ? '🥈' : '🥉' }}
+                  </span>
+                </div>
+              </td>
+              <td class="price">₪{{ gift.unitPrice.toFixed(2) }}</td>
+              <td class="quantity">
+                <span class="quantity-badge">{{ gift.totalQuantitySold }}</span>
+              </td>
+              <td class="count">{{ gift.purchaseCount }}</td>
+              <td class="revenue">
+                <span class="revenue-value">₪{{ gift.totalRevenue.toFixed(2) }}</span>
+              </td>
+              <td class="actions">
+                <div class="actions-container">
+                  <button 
+                    class="btn-view"
+                    (click)="selectGift(gift.giftId)"
+                    [class.active]="isGiftSelected(gift.giftId)"
+                  >
+                    {{ isGiftSelected(gift.giftId) ? '✓ נבחר' : '👁️ צפה' }}
+                  </button>
+                  <button 
+                    class="btn-raffle"
+                    (click)="runRaffle(gift)"
+                    [disabled]="gift.hasWinner || gift.isDrawing || gift.purchaseCount === 0"
+                    [class.drawing]="gift.isDrawing"
+                    title="{{ gift.hasWinner ? 'כבר בוצעה הגרלה' : gift.purchaseCount === 0 ? 'אין משתתפים' : 'הגרל זוכה' }}"
+                  >
+                    <span *ngIf="!gift.isDrawing && !gift.hasWinner">🎲 הגרלה</span>
+                    <span *ngIf="gift.isDrawing">⏳ מגריל...</span>
+                    <span *ngIf="gift.hasWinner && !gift.isDrawing">🏆 הוגרל</span>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <ng-template #noGifts>
+        <div class="no-data">
+          <p>לא נמצאו מתנות מתאימות</p>
+        </div>
+      </ng-template>
+    </div>
+
+    <!-- Purchaser Details Table -->
+    <div class="section">
+      <h2>
+        👥 פרטי רכישות
+        <span *ngIf="selectedGiftId !== null" class="filter-indicator">
+          (מסונן לפי מתנה #{{ selectedGiftId }})
+        </span>
+      </h2>
+      
+      <div class="table-container" *ngIf="filteredPurchaserDetails.length > 0; else noPurchasers">
+        <table class="data-table purchaser-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>מזהה רכישה</th>
+              <th>מזהה מתנה</th>
+              <th>שם המתנה</th>
+              <th>כמות</th>
+              <th>מחיר יחידה</th>
+              <th>סה"כ</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr 
+              *ngFor="let detail of filteredPurchaserDetails; let i = index"
+              class="data-row"
+            >
+              <td class="row-number">{{ i + 1 }}</td>
+              <td class="purchase-id">{{ detail.purchaseId }}</td>
+              <td class="gift-id">{{ detail.giftId }}</td>
+              <td class="gift-name">{{ detail.giftName }}</td>
+              <td class="quantity">
+                <span class="quantity-badge">{{ detail.quantity }}</span>
+              </td>
+              <td class="price">₪{{ detail.unitPrice.toFixed(2) }}</td>
+              <td class="total">
+                <span class="total-value">₪{{ detail.totalPrice.toFixed(2) }}</span>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr class="total-row">
+              <td colspan="4" class="total-label">סה"כ:</td>
+              <td class="total-quantity">
+                {{ filteredTotalQuantity }}
+              </td>
+              <td></td>
+              <td class="total-amount">
+                ₪{{ filteredTotalPrice.toFixed(2) }}
+              </td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <ng-template #noPurchasers>
+        <div class="no-data">
+          <p>אין רכישות להצגה</p>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
+
+<!-- Winner Modal -->
+<div class="winner-modal-overlay" *ngIf="showWinnerModal" (click)="closeWinnerModal()">
+  <div class="winner-modal" (click)="$event.stopPropagation()">
+    <button class="modal-close" (click)="closeWinnerModal()">✕</button>
+    
+    <div class="modal-content">
+      <div class="celebration-icon">🎉</div>
+      <h2>מזל טוב! יש לנו זוכה!</h2>
+      
+      <div class="winner-details">
+        <div class="detail-item">
+          <span class="detail-label">מתנה:</span>
+          <span class="detail-value">{{ winnerInfo?.giftName }}</span>
+        </div>
+        
+        <div class="winner-info-highlight">
+          <div class="detail-item">
+            <span class="detail-label">זוכה:</span>
+            <span class="detail-value winner-name">{{ winnerInfo?.winnerName }}</span>
+          </div>
+          
+          <div class="detail-item">
+            <span class="detail-label">אימייל:</span>
+            <span class="detail-value winner-email">{{ winnerInfo?.winnerEmail }}</span>
+          </div>
+        </div>
+        
+        <div class="detail-item small">
+          <span class="detail-label">מספר רכישה:</span>
+          <span class="detail-value">{{ winnerInfo?.purchaseId }}</span>
+        </div>
+      </div>
+      
+      <button class="btn-modal-close" (click)="closeWinnerModal()">
+        סגור
+      </button>
+    </div>
+  </div>
+</div>

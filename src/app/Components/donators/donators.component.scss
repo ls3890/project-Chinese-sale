@@ -1,0 +1,207 @@
+/* קונטיינר ראשי */
+.donators-container {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
+}
+
+h2 {
+  color: #2c3e50;
+  border-bottom: 3px solid #3498db;
+  padding-bottom: 10px;
+  margin-bottom: 30px;
+}
+
+/* כרטיס הטופס */
+.form-card {
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  margin-bottom: 40px;
+  border: 1px solid #edf2f7;
+
+  h3 {
+    margin-top: 0;
+    color: #4a5568;
+    font-size: 1.25rem;
+    margin-bottom: 20px;
+  }
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+
+  label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #4a5568;
+  }
+
+  .form-control {
+    padding: 12px;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+
+    &:focus {
+      outline: none;
+      border-color: #3498db;
+      box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    }
+  }
+}
+
+/* כפתורים */
+.form-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-start;
+}
+
+.btn {
+  padding: 10px 24px;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: none;
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btn-save { background: #3498db; color: white; &:hover:not(:disabled) { background: #2980b9; } }
+.btn-cancel { background: #edf2f7; color: #4a5568; &:hover { background: #e2e8f0; } }
+
+/* שורת חיפוש */
+.search-section {
+  margin-bottom: 20px;
+  
+  .search-input {
+    width: 100%;
+    padding: 12px 20px;
+    border-radius: 50px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.02);
+    font-size: 1rem;
+    
+    &:focus {
+      outline: none;
+      border-color: #3498db;
+    }
+  }
+}
+
+/* טבלה מעוצבת */
+.table-container {
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.styled-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: right;
+
+  thead tr {
+    background-color: #f8fafc;
+    color: #4a5568;
+    text-align: right;
+  }
+
+  th, td {
+    padding: 15px 20px;
+    border-bottom: 1px solid #edf2f7;
+  }
+
+  tbody tr:hover { background-color: #f1f5f9; }
+  
+  .active-row { background-color: #ebf8ff !important; }
+}
+
+/* כפתורי פעולה בטבלה */
+.btn-link {
+  background: none;
+  border: none;
+  color: #3498db;
+  cursor: pointer;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.btn-action {
+  background: none;
+  border: none;
+  font-size: 1.1rem;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 4px;
+  transition: transform 0.2s;
+
+  &:hover { transform: scale(1.2); }
+  &.delete:hover { background: #fff5f5; }
+  &.edit:hover { background: #ebf8ff; }
+}
+
+/* פאנל מתנות מורחב */
+.details-row td { padding: 0; }
+
+.gifts-panel {
+  background: #f8fafc;
+  padding: 20px;
+  border-bottom: 2px solid #3498db;
+  animation: fadeIn 0.3s ease-out;
+
+  h4 { margin: 0 0 15px 0; font-size: 1rem; color: #2d3748; }
+}
+
+.gifts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 10px;
+  list-style: none;
+  padding: 0;
+}
+
+.gift-item {
+  background: white;
+  padding: 10px;
+  border-radius: 6px;
+  border-right: 4px solid #3498db;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+
+  .gift-name { font-weight: 600; font-size: 0.9rem; }
+  .gift-price { color: #2ecc71; font-size: 0.85rem; }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px !important;
+  color: #a0aec0;
+  font-style: italic;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}

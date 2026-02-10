@@ -1,0 +1,122 @@
+<div class="cart-container" dir="rtl">
+  <!-- Back to Home Button -->
+  <div class="back-to-home-section">
+    <button routerLink="/home" class="btn-back-home">
+      🏠 חזרה לדף הבית
+    </button>
+  </div>
+
+  <!-- Header -->
+  <div class="cart-header">
+    <h1>🛒 עגלת הקניות שלי</h1>
+    <button 
+      class="btn-refresh" 
+      (click)="refreshCart()"
+      [disabled]="isLoading"
+      title="רענן"
+    >
+      🔄
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>טוען את העגלה...</p>
+  </div>
+
+  <!-- Empty Cart State -->
+  <div class="empty-cart" *ngIf="isEmpty && !isLoading">
+    <div class="empty-icon">🛒</div>
+    <h2>העגלה שלך ריקה</h2>
+    <p>לא הוספת עדיין פריטים לעגלה</p>
+    <button class="btn-primary" routerLink="/gifts">
+      עבור לרשימת המתנות
+    </button>
+  </div>
+
+  <!-- Cart Content -->
+  <div class="cart-content" *ngIf="!isEmpty && !isLoading">
+    <!-- Cart Summary -->
+    <div class="cart-summary">
+      <div class="summary-item">
+        <span class="summary-label">סה"כ פריטים:</span>
+        <span class="summary-value">{{ itemCount }}</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">סה"כ יחידות:</span>
+        <span class="summary-value">{{ totalQuantity }}</span>
+      </div>
+      <div class="summary-item grand-total">
+        <span class="summary-label">סה"כ לתשלום:</span>
+        <span class="summary-value">₪{{ grandTotal.toFixed(2) }}</span>
+      </div>
+    </div>
+
+    <!-- Cart Items Table -->
+    <div class="cart-table-container">
+      <table class="cart-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>שם המתנה</th>
+            <th>מחיר יחידה</th>
+            <th>כמות</th>
+            <th>סה"כ</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of cartItems; let i = index" class="cart-item">
+            <td class="item-number">{{ i + 1 }}</td>
+            <td class="item-name">
+              <div class="gift-name">{{ item.GiftName }}</div>
+              <div class="gift-id">מזהה: {{ item.GiftId }}</div>
+            </td>
+            <td class="item-price">
+              <span class="price-value">₪{{ item.UnitPrice.toFixed(2) }}</span>
+            </td>
+            <td class="item-quantity">
+              <span class="quantity-badge">{{ item.Quantity }}</span>
+            </td>
+            <td class="item-total">
+              <span class="total-value">₪{{ item.TotalPrice.toFixed(2) }}</span>
+            </td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="4" class="total-label">סה"כ כולל:</td>
+            <td class="total-amount">₪{{ grandTotal.toFixed(2) }}</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="cart-actions">
+      <button 
+        class="btn-confirm"
+        (click)="confirmOrder()"
+        [disabled]="isConfirming"
+      >
+        <span *ngIf="!isConfirming">✅ אשר הזמנה</span>
+        <span *ngIf="isConfirming">
+          <span class="spinner-small"></span>
+          מאשר...
+        </span>
+      </button>
+
+      <button 
+        class="btn-continue" 
+        routerLink="/gifts"
+      >
+        המשך בקניות
+      </button>
+    </div>
+
+    <!-- Cart Info -->
+    <div class="cart-info">
+      <p>ℹ️ לאחר אישור ההזמנה, הפריטים יועברו למצב מאושר ולא ניתן יהיה לבטל.</p>
+    </div>
+  </div>
+</div>

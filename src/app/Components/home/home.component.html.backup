@@ -1,0 +1,247 @@
+<div class="home-container" dir="rtl">
+  <!-- PrimeNG Toast for Notifications -->
+  <p-toast position="top-left"></p-toast>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <!-- Logo - Clickable Home Button -->
+      <div class="logo" routerLink="/home" style="cursor: pointer;">
+        <h2>🏠 🎁 הגרלת מתנות</h2>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="nav-links">
+        <a routerLink="/home" routerLinkActive="active" class="nav-link">
+          <i class="pi pi-home"></i> בית
+        </a>
+        <a routerLink="/gifts" routerLinkActive="active" class="nav-link">
+          <i class="pi pi-gift"></i> מתנות
+        </a>
+        <a routerLink="/cart" routerLinkActive="active" class="nav-link" *ngIf="isLoggedIn">
+          <i class="pi pi-shopping-cart"></i> העגלה שלי
+          <p-badge *ngIf="cartItemCount > 0" [value]="cartItemCount.toString()" severity="danger"></p-badge>
+        </a>
+        <a class="nav-link">
+          <i class="pi pi-info-circle"></i> אודות
+        </a>
+      </div>
+
+      <!-- User Actions -->
+      <div class="nav-actions">
+        <!-- Manager Dashboard Button -->
+        <button *ngIf="isManager" 
+                routerLink="/admin/purchases" 
+                pButton 
+                severity="warning"
+                icon="pi pi-chart-bar"
+                label="לוח בקרה">
+        </button>
+
+        <!-- Login/Register or User Info -->
+        <div *ngIf="!isLoggedIn" class="auth-buttons">
+          <button routerLink="/login" 
+                  pButton 
+                  severity="secondary"
+                  [outlined]="true"
+                  icon="pi pi-sign-in" 
+                  label="התחברות">
+          </button>
+          <button routerLink="/register" 
+                  pButton 
+                  severity="success"
+                  icon="pi pi-user-plus" 
+                  label="הרשמה">
+          </button>
+        </div>
+
+        <div *ngIf="isLoggedIn" class="user-info">
+          <span class="user-greeting">
+            <i class="pi pi-user"></i> שלום, {{ userName }}
+          </span>
+          <button (click)="logout()" 
+                  pButton 
+                  severity="danger"
+                  size="small"
+                  icon="pi pi-sign-out"
+                  label="התנתק">
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      // <h1 class="hero-title">🏆 זכה במתנת החלומות שלך!</h1>
+      <p class="hero-subtitle">השתתף בהגרלה והזדמנות לזכות במתנות מדהימות</p>
+      <button class="btn-hero" 
+              routerLink="/gifts"
+              pButton
+              severity="success"
+              size="large"
+              icon="pi pi-arrow-left"
+              label="עיין במתנות"
+              iconPos="right">
+      </button>
+
+      <!-- Admin Dashboard Button (Only for Managers) -->
+      <button *ngIf="isManager" 
+              class="btn-admin-hero" 
+              routerLink="/admin/purchases"
+              pButton
+              severity="warning"
+              size="large"
+              icon="pi pi-chart-bar"
+              label="לוח בקרה מנהל">
+      </button>
+    </div>
+    <div class="hero-image">
+      <div class="gift-box-animation">🎁</div>
+    </div>
+  </section>
+
+  <!-- Search and Filter Section -->
+  <section class="filter-section">
+    <div class="filter-content">
+      <!-- Search Bar -->
+      <div class="search-box">
+        <span class="p-input-icon-left" style="width: 100%;">
+          <i class="pi pi-search"></i>
+          <input 
+            type="text" 
+            pInputText
+            [(ngModel)]="searchText" 
+            (ngModelChange)="filterGifts()"
+            placeholder="חפש מתנה..."
+            class="search-input"
+            style="width: 100%;"
+          />
+        </span>
+      </div>
+
+      <!-- Category Filter -->
+      <div class="category-filter">
+        <p-dropdown 
+          [(ngModel)]="selectedCategory" 
+          [options]="getCategoryOptions()"
+          (onChange)="filterGifts()"
+          placeholder="בחר קטגוריה"
+          [showClear]="true"
+          styleClass="category-dropdown">
+        </p-dropdown>
+      </div>
+
+      <!-- Sort Filter -->
+      <div class="sort-options">
+        <p-dropdown 
+          [(ngModel)]="selectedSort" 
+          [options]="getSortOptions()"
+          (onChange)="sortGifts()"
+          placeholder="מיין לפי"
+          [showClear]="true"
+          styleClass="sort-dropdown">
+        </p-dropdown>
+      </div>
+
+      <!-- Results Count -->
+      <div class="results-count">
+        <p-badge [value]="filteredGifts.length + ' מתנות'" severity="info"></p-badge>
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <i class="pi pi-spin pi-spinner" style="font-size: 3rem; color: #6366f1;"></i>
+    <p>טוען מתנות...</p>
+  </div>
+
+  <!-- Gifts Grid -->
+  <section class="gifts-section" *ngIf="!isLoading">
+    <div class="gifts-grid" *ngIf="filteredGifts.length > 0; else noGifts">
+      <p-card *ngFor="let gift of filteredGifts" 
+              styleClass="gift-card"
+              [style]="{height: '100%'}">
+        
+        <!-- Card Header with Image -->
+        <ng-template pTemplate="header">
+          <img [src]="getGiftImage(gift)" 
+               [alt]="getGiftName(gift)"
+               class="gift-image"
+               style="width: 100%; height: 250px; object-fit: cover;">
+        </ng-template>
+
+        <!-- Card Content -->
+        <div class="gift-content">
+          <h3 class="gift-name">{{ getGiftName(gift) }}</h3>
+          
+          <div class="gift-meta" style="margin: 1rem 0;">
+            <div class="gift-donator" *ngIf="getDonorName(gift)" style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+              <i class="pi pi-user" style="color: #6366f1;"></i>
+              <span>{{ getDonorName(gift) }}</span>
+            </div>
+
+            <div class="gift-tickets" *ngIf="getParticipantCount(gift)" style="display: flex; align-items: center; gap: 0.5rem;">
+              <i class="pi pi-ticket" style="color: #10b981;"></i>
+              <span>{{ getParticipantCount(gift) }} משתתפים</span>
+            </div>
+          </div>
+
+          <div class="gift-price-container" style="margin-top: 1rem;">
+            <p-badge 
+              [value]="'₪' + getDisplayPrice(gift)" 
+              severity="success"
+              [style]="{fontSize: '1.2rem', padding: '0.5rem 1rem'}">
+            </p-badge>
+          </div>
+        </div>
+
+        <!-- Card Footer with Actions -->
+        <ng-template pTemplate="footer">
+          <div class="card-actions">
+            <button 
+              pButton 
+              [label]="isLoggedIn ? 'הוסף לעגלה' : 'התחבר להוספה'"
+              icon="pi pi-shopping-cart"
+              [severity]="isLoggedIn ? 'success' : 'secondary'"
+              [disabled]="!isLoggedIn"
+              [style]="{width: '100%'}"
+              (click)="addToCart(gift)">
+            </button>
+          </div>
+        </ng-template>
+      </p-card>
+    </div>
+
+    <!-- No Gifts Message -->
+    <ng-template #noGifts>
+      <div class="no-gifts" style="text-align: center; padding: 4rem 2rem;">
+        <i class="pi pi-inbox" style="font-size: 5rem; color: #9ca3af;"></i>
+        <h3 style="margin-top: 1rem; color: #374151;">לא נמצאו מתנות</h3>
+        <p style="color: #6b7280; margin: 0.5rem 0 1.5rem;">נסה לשנות את החיפוש או הסינון</p>
+        <button 
+          pButton 
+          label="איפוס סינונים"
+          icon="pi pi-refresh"
+          severity="secondary"
+          [outlined]="true"
+          (click)="searchText = ''; selectedCategory = 'all'; filterGifts()">
+        </button>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>🎁 מערכת הגרלת מתנות - כל הזכויות שמורות © 2026</p>
+      <div class="footer-links">
+        <a href="#">תנאי שימוש</a>
+        <a href="#">מדיניות פרטיות</a>
+        <a href="#">צור קשר</a>
+      </div>
+    </div>
+  </footer>
+</div>

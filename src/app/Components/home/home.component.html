@@ -1,0 +1,192 @@
+<div class="home-container" dir="rtl">
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-content">
+      <!-- Logo - Clickable Home Button -->
+      <div class="logo" routerLink="/home" style="cursor: pointer;">
+        <h2>🏠 🎁 הגרלת מתנות</h2>
+      </div>
+
+      <!-- Navigation Links -->
+      <div class="nav-links">
+        <a routerLink="/home" routerLinkActive="active" class="nav-link">בית</a>
+        <a routerLink="/gifts" routerLinkActive="active" class="nav-link">מתנות</a>
+        <a routerLink="/donators" routerLinkActive="active" class="nav-link" *ngIf="isManager">תורמים</a>
+        <a routerLink="/cart" routerLinkActive="active" class="nav-link" *ngIf="isLoggedIn">העגלה שלי</a>
+        <a class="nav-link">אודות</a>
+      </div>
+
+      <!-- User Actions -->
+      <div class="nav-actions">
+        <!-- Manager Dashboard Button -->
+        <button *ngIf="isManager" routerLink="/admin/purchases" class="btn-dashboard">
+          📊 לוח בקרה
+        </button>
+
+        <!-- Cart Icon with Badge -->
+        <div class="cart-icon" *ngIf="isLoggedIn" routerLink="/cart">
+          🛒
+          <span class="cart-badge" *ngIf="cartItemCount > 0">{{ cartItemCount }}</span>
+        </div>
+
+        <!-- Login/Register or User Info -->
+        <div *ngIf="!isLoggedIn" class="auth-buttons">
+          <button routerLink="/login" class="btn-login">התחברות</button>
+          <button routerLink="/register" class="btn-register">הרשמה</button>
+        </div>
+
+        <div *ngIf="isLoggedIn" class="user-info">
+          <span class="user-greeting">שלום, {{ userName }}</span>
+          <button (click)="logout()" class="btn-logout">התנתק</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1 class="hero-title">🏆 זכה במתנת החלומות שלך!</h1>
+      <p class="hero-subtitle">השתתף בהגרלה והזדמנות לזכות במתנות מדהימות</p>
+      <button class="btn-hero" routerLink="/gifts">
+        עיין במתנות
+        <span class="arrow">⬅️</span>
+      </button>
+
+      <!-- Admin Dashboard Button (Only for Managers) -->
+      <button *ngIf="isManager" class="btn-admin-hero" routerLink="/admin/purchases">
+        📊 לוח בקרה מנהל
+      </button>
+    </div>
+    <div class="hero-image">
+      <div class="gift-box-animation">🎁</div>
+    </div>
+  </section>
+
+  <!-- Search and Filter Section -->
+  <section class="filter-section">
+    <div class="filter-content">
+      <!-- Search Bar -->
+      <div class="search-box">
+        <input 
+          type="text" 
+          [(ngModel)]="searchText" 
+          (ngModelChange)="filterGifts()"
+          placeholder="🔍 חפש מתנה..."
+          class="search-input"
+        />
+      </div>
+
+      <!-- Category Filter -->
+      <div class="category-filter">
+        <label>סינון לפי קטגוריה:</label>
+        <select 
+          [(ngModel)]="selectedCategory" 
+          (ngModelChange)="filterGifts()"
+          class="category-select"
+        >
+          <option value="all">כל הקטגוריות</option>
+          <option *ngFor="let category of categories" [value]="category">
+            {{ category }}
+          </option>
+        </select>
+      </div>
+
+      <!-- Sort Filter -->
+      <div class="category-filter">
+        <label>מיון לפי:</label>
+        <select 
+          (change)="sortGifts($any($event.target).value)"
+          class="category-select"
+        >
+          <option value="">בחר מיון</option>
+          <option value="expensive">הכי יקרים</option>
+          <option value="popular">הכי פופולריים</option>
+          <option value="name">שם מתנה</option>
+        </select>
+      </div>
+
+      <!-- Results Count -->
+      <div class="results-count">
+        נמצאו {{ filteredGifts.length }} מתנות
+      </div>
+    </div>
+  </section>
+
+  <!-- Loading State -->
+  <div class="loading-state" *ngIf="isLoading">
+    <div class="spinner"></div>
+    <p>טוען מתנות...</p>
+  </div>
+
+  <!-- Gifts Grid -->
+  <section class="gifts-section" *ngIf="!isLoading">
+    <div class="gifts-grid" *ngIf="filteredGifts.length > 0; else noGifts">
+      <div class="gift-card" *ngFor="let gift of filteredGifts">
+        <!-- Gift Image -->
+        <div class="gift-image" [style.background-image]="'url(' + getGiftImage(gift) + ')'">
+          <div class="gift-category-badge" *ngIf="getGiftCategory(gift)">
+            {{ getGiftCategory(gift) }}
+          </div>
+        </div>
+
+        <!-- Gift Details -->
+        <div class="gift-details">
+          <h3 class="gift-name">{{ getGiftName(gift) }}</h3>
+          
+          <div class="gift-meta">
+            <div class="gift-price">
+              <span class="price-label">מחיר כרטיס:</span>
+              <span class="price-value">{{ getDisplayPrice(gift) }}</span>
+            </div>
+            
+            <div class="gift-donator" *ngIf="getDonorName(gift)">
+              <span class="donator-icon">👤</span>
+              <span class="donator-name">{{ getDonorName(gift) }}</span>
+            </div>
+
+            <div class="gift-tickets" *ngIf="getParticipantCount(gift)">
+              <span class="tickets-icon">🎟️</span>
+              <span class="tickets-count">{{ getParticipantCount(gift) }} משתתפים</span>
+            </div>
+          </div>
+
+          <!-- Add to Cart Button -->
+          <button 
+            class="btn-add-to-cart" 
+            (click)="addToCart(gift)"
+            [disabled]="!isLoggedIn"
+          >
+            <span *ngIf="isLoggedIn">➕ הוסף לעגלה</span>
+            <span *ngIf="!isLoggedIn">🔒 התחבר להוספה</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- No Gifts Message -->
+    <ng-template #noGifts>
+      <div class="no-gifts">
+        <div class="no-gifts-icon">🔍</div>
+        <h3>לא נמצאו מתנות</h3>
+        <p>נסה לשנות את החיפוש או הסינון</p>
+        <button class="btn-reset" (click)="searchText = ''; selectedCategory = 'all'; filterGifts()">
+          איפוס סינונים
+        </button>
+      </div>
+    </ng-template>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p>© 2026 הגרלת מתנות | כל הזכויות שמורות</p>
+      <div class="footer-links">
+        <a routerLink="/home">בית</a>
+        <a routerLink="/gifts">מתנות</a>
+        <a>צור קשר</a>
+        <a>תקנון</a>
+      </div>
+    </div>
+  </footer>
+</div>
