@@ -35,15 +35,13 @@ export class HomeComponent implements OnInit {
     this.loadCartCount();
   }
 
-  /**
-   * Load all gifts from the server
-   */
+  
   loadGifts(): void {
     this.isLoading = true;
     
     this.giftService.getAll().subscribe({
       next: (response: any) => {
-        // Handle $values wrapper if present
+
         if (response && response.$values) {
           this.gifts = response.$values;
         } else if (Array.isArray(response)) {
@@ -84,6 +82,7 @@ export class HomeComponent implements OnInit {
    */
   filterGifts(): void {
     this.filteredGifts = this.gifts.filter(gift => {
+      
       const giftName = (gift.name || gift.Name || '').toLowerCase();
       const giftCategory = (gift.category || gift.Category || gift.categoryName || gift.CategoryName || '').toLowerCase();
       const searchLower = this.searchText.toLowerCase();

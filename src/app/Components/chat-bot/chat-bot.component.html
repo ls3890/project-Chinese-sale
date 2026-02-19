@@ -1,0 +1,120 @@
+<!-- Floating Chat Button -->
+<div class="chat-container">
+  <button 
+    class="chat-toggle-btn" 
+    (click)="toggleChat()"
+    [class.open]="isChatOpenValue"
+    aria-label="פתח/סגור צ'אט">
+    <svg *ngIf="!isChatOpenValue" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <svg *ngIf="isChatOpenValue" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18"></line>
+      <line x1="6" y1="6" x2="18" y2="18"></line>
+    </svg>
+  </button>
+
+  <!-- Chat Window -->
+  <div class="chat-window" [class.open]="isChatOpenValue" [class.minimized]="isMinimizedValue">
+    <div class="chat-header">
+      <div class="header-content">
+        <h3>🤖 עוזר מכירה חכם</h3>
+        <div class="header-actions">
+          <button 
+            class="minimize-btn" 
+            (click)="toggleMinimize()" 
+            aria-label="מזער"
+            title="מזער חלון">
+            <svg *ngIf="!isMinimizedValue" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="5" y1="12" x2="19" y2="12"></line>
+            </svg>
+            <svg *ngIf="isMinimizedValue" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <polyline points="18 15 12 9 6 15"></polyline>
+            </svg>
+          </button>
+          <button 
+            class="clear-btn" 
+            (click)="clearChat()" 
+            aria-label="נקה צ'אט"
+            title="נקה שיחה">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="3 6 5 6 21 6"></polyline>
+              <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <button class="close-btn" (click)="toggleChat()" aria-label="סגור צ'אט">×</button>
+    </div>
+
+    <div class="chat-content" [class.hidden]="isMinimizedValue">
+      <!-- Quick Action Buttons -->
+      <div class="quick-actions" *ngIf="showQuickActionsValue && messagesValue.length > 0">
+        <p class="quick-actions-title">🚀 פעולות מהירות:</p>
+        <div class="quick-actions-buttons">
+          <button class="quick-action-btn budget" (click)="handleQuickAction('budget')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+            <span>מתנות במחיר נמוך</span>
+          </button>
+          <button class="quick-action-btn cart" (click)="handleQuickAction('cart')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+            <span>סטטוס העגלה שלי</span>
+          </button>
+          <button class="quick-action-btn raffle" (click)="handleQuickAction('raffle')">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
+            </svg>
+            <span>מידע על ההגרלה</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="chat-messages">
+        <div *ngFor="let message of messagesValue" 
+             class="message-wrapper"
+             [class.user-message]="!message.isBot"
+             [class.bot-message]="message.isBot">
+          <div class="message-bubble">
+            {{ message.text }}
+          </div>
+        </div>
+        
+        <div *ngIf="isTypingValue" class="message-wrapper bot-message">
+          <div class="message-bubble typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat-input-container">
+        <input 
+          type="text" 
+          [value]="userInputValue"
+          (input)="setUserInput($any($event.target).value)"
+          (keypress)="onKeyPress($event)"
+          placeholder="הקלד הודעה או מספר לחיפוש מתנות..."
+          class="chat-input"
+          [disabled]="isTypingValue">
+        <button 
+          (click)="sendMessage()"
+          [disabled]="!userInputValue.trim() || isTypingValue"
+          class="send-btn"
+          aria-label="שלח הודעה">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"></line>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
